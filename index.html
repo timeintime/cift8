@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#050105" id="meta-theme-color">
+ 
+    <title>Genco & Tolga - Time in Time</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #ff1493;
+            --secondary-color: #ff69b4;
+            --glow-color: rgba(255, 20, 147, 0.4);
+            --bg-color: #050105;
+        }
+ 
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: var(--bg-color);
+            color: var(--secondary-color);
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+ 
+        .neon-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+ 
+        .neon-glow-primary {
+            text-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color), 0 0 30px var(--secondary-color), 0 0 40px var(--secondary-color);
+        }
+ 
+        .neon-glow-box {
+            box-shadow: 0 0 30px var(--glow-color), inset 0 0 25px rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--secondary-color);
+        }
+
+        /* Fotoğraf Çerçevesi Özel Stili */
+        .photo-frame {
+            box-shadow: 0 0 20px var(--glow-color);
+            border: 3px solid var(--secondary-color);
+        }
+ 
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+ 
+        #floating-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+        }
+ 
+        @keyframes floatUp {
+            0% {
+                transform: translateY(105vh) scale(0.6) rotate(0deg);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.9;
+            }
+            80% {
+                opacity: 0.9;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.3) rotate(360deg);
+                opacity: 0;
+            }
+        }
+ 
+        .floating-item {
+            position: absolute;
+            bottom: -60px;
+            animation: floatUp linear infinite;
+        }
+ 
+        .content-layer {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* WhatsApp Siyah Kalp Atış Animasyonu */
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            15% { transform: scale(1.25); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.15); }
+            60% { transform: scale(1); }
+        }
+
+        .whatsapp-heart {
+            display: inline-block;
+            animation: heartbeat 1.2s infinite ease-in-out;
+            filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.8));
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-4 md:p-8 select-none">
+ 
+    <canvas id="matrix-canvas"></canvas>
+    <div id="floating-container"></div>
+ 
+    <header class="w-full text-center mt-4 md:mt-8 content-layer">
+        <div id="badge-wrapper" class="inline-block px-4 py-1.5 rounded-full bg-black/60 border backdrop-blur-md mb-3 shadow-lg">
+            <span id="badge-text" class="text-xs md:text-sm tracking-widest uppercase neon-font"></span>
+        </div>
+        <h1 id="names-heading" class="text-3xl sm:text-4xl md:text-7xl font-black tracking-wider neon-font neon-glow-primary mb-2"></h1>
+        <p id="subtitle-text" class="text-xs md:text-base tracking-widest uppercase font-semibold opacity-90"></p>
+    </header>
+ 
+    <main class="w-full max-w-3xl bg-black/70 backdrop-blur-xl rounded-3xl p-5 md:p-10 neon-glow-box content-layer my-6 text-center relative overflow-hidden">
+        
+        <div id="glow-corner-1" class="absolute -top-12 -left-12 w-32 h-32 rounded-full blur-2xl pointer-events-none opacity-40"></div>
+        <div id="glow-corner-2" class="absolute -bottom-12 -right-12 w-32 h-32 rounded-full blur-2xl pointer-events-none opacity-40"></div>
+
+        <!-- ÇİFTİN FOTOĞRAF ALANI (ÇERÇEVELİ) -->
+        <div class="flex justify-center mb-6">
+            <div class="relative w-36 h-36 sm:w-48 sm:h-48 rounded-2xl overflow-hidden photo-frame bg-black/40">
+                <!-- BURAYA DİKKAT: Fotoğrafının adını buraya yazdık (cift6.jpg) -->
+                <img src="cift6.jpg" alt="Genco & Tolga" class="w-full h-full object-cover">
+            </div>
+        </div>
+ 
+        <div class="mb-4 md:mb-6">
+            <!-- Yanyana Atan Siyah 2 Adet Kalp (WhatsApp Emojisi Şeklinde) -->
+            <div id="main-icon" class="flex justify-center items-center gap-3 text-3xl md:text-4xl mb-2 block">
+                <span class="whatsapp-heart">🖤</span>
+                <span class="whatsapp-heart" style="animation-delay: 0.3s;">🖤</span>
+            </div>
+            <h2 id="box-title" class="text-lg md:text-2xl font-bold mt-2 neon-font text-white"></h2>
+            <p id="start-date-text" class="text-xs opacity-80 mt-1"></p>
+        </div>
+ 
+        <div class="grid grid-cols-5 gap-1.5 sm:gap-3 my-4 md:my-6">
+            <div class="bg-black/50 border border-white/20 rounded-xl md:rounded-2xl p-2 sm:p-4 backdrop-blur-md shadow-inner flex flex-col justify-center items-center">
+                <span id="years" class="text-lg sm:text-3xl md:text-4xl font-black text-white neon-font neon-glow-primary block">00</span>
+                <span class="text-[9px] sm:text-xs uppercase tracking-wider opacity-80 mt-1 block">Yıl</span>
+            </div>
+            <div class="bg-black/50 border border-white/20 rounded-xl md:rounded-2xl p-2 sm:p-4 backdrop-blur-md shadow-inner flex flex-col justify-center items-center">
+                <span id="months" class="text-lg sm:text-3xl md:text-4xl font-black text-white neon-font neon-glow-primary block">00</span>
+                <span class="text-[9px] sm:text-xs uppercase tracking-wider opacity-80 mt-1 block">Ay</span>
+            </div>
+            <div class="bg-black/50 border border-white/20 rounded-xl md:rounded-2xl p-2 sm:p-4 backdrop-blur-md shadow-inner flex flex-col justify-center items-center">
+                <span id="days" class="text-lg sm:text-3xl md:text-4xl font-black text-white neon-font neon-glow-primary block">00</span>
+                <span class="text-[9px] sm:text-xs uppercase tracking-wider opacity-80 mt-1 block">Gün</span>
+            </div>
+            <div class="bg-black/50 border border-white/20 rounded-xl md:rounded-2xl p-2 sm:p-4 backdrop-blur-md shadow-inner flex flex-col justify-center items-center">
+                <span id="hours" class="text-lg sm:text-3xl md:text-4xl font-black text-white neon-font neon-glow-primary block">00</span>
+                <span class="text-[9px] sm:text-xs uppercase tracking-wider opacity-80 mt-1 block">Saat</span>
+            </div>
+            <div class="bg-black/50 border border-white/20 rounded-xl md:rounded-2xl p-2 sm:p-4 backdrop-blur-md shadow-inner flex flex-col justify-center items-center">
+                <span id="seconds" class="text-lg sm:text-3xl md:text-4xl font-black text-white neon-font neon-glow-primary block">00</span>
+                <span class="text-[9px] sm:text-xs uppercase tracking-wider opacity-80 mt-1 block">Saniye</span>
+            </div>
+        </div>
+ 
+        <div class="mt-6 pt-4 sm:pt-6 border-t border-white/20">
+            <p id="quote-text" class="text-white/90 text-xs sm:text-base md:text-lg italic font-light leading-relaxed px-2 sm:px-4"></p>
+        </div>
+    </main>
+ 
+    <footer class="w-full text-center pb-2 sm:pb-4 content-layer">
+        <p id="footer-text" class="text-[10px] sm:text-xs tracking-widest uppercase opacity-70"></p>
+    </footer>
+ 
+    <script>
+        const CONFIG = {
+            firstName: "LEYLA",
+            secondName: "MECNUN",
+            theme: "pink",
+            startDateISO: "2008-02-08T00:00:00",
+            startDateLabel: "Başlangıç: 08 Şubat 2008",
+            badgeText: " ",
+            subtitleText: " ",
+            boxTitle: "Bizim Zamanımız",
+            quoteText: "",
+            footerText: "timeintime"
+        };
+ 
+        const THEMES = {
+            pink: { primary: "#ff1493", secondary: "#ff69b4", glow: "rgba(255, 20, 147, 0.4)", bg: "#050105", matrixBg: "rgba(5, 1, 5, 0.15)" },
+            yellow: { primary: "#ffd700", secondary: "#ffea00", glow: "rgba(255, 215, 0, 0.4)", bg: "#050500", matrixBg: "rgba(5, 5, 0, 0.15)" },
+            green: { primary: "#00ff66", secondary: "#55ff99", glow: "rgba(0, 255, 102, 0.4)", bg: "#000502", matrixBg: "rgba(0, 5, 2, 0.15)" },
+            white: { primary: "#e0f7fa", secondary: "#ffffff", glow: "rgba(255, 255, 255, 0.3)", bg: "#030508", matrixBg: "rgba(3, 5, 8, 0.15)" }
+        };
+ 
+        const currentTheme = THEMES[CONFIG.theme] || THEMES.pink;
+        document.documentElement.style.setProperty('--primary-color', currentTheme.primary);
+        document.documentElement.style.setProperty('--secondary-color', currentTheme.secondary);
+        document.documentElement.style.setProperty('--glow-color', currentTheme.glow);
+        document.documentElement.style.setProperty('--bg-color', currentTheme.bg);
+        
+        const metaTheme = document.getElementById('meta-theme-color');
+        if (metaTheme) metaTheme.setAttribute('content', currentTheme.bg);
+ 
+        document.getElementById('badge-text').innerText = CONFIG.badgeText;
+        document.getElementById('badge-wrapper').style.borderColor = currentTheme.secondary + '60';
+        document.getElementById('badge-text').style.color = currentTheme.secondary;
+ 
+        document.getElementById('names-heading').innerHTML = `${CONFIG.firstName} <span class="text-white text-2xl sm:text-3xl md:text-6xl">&</span> ${CONFIG.secondName}`;
+        document.getElementById('subtitle-text').innerText = CONFIG.subtitleText;
+        document.getElementById('box-title').innerText = CONFIG.boxTitle;
+        document.getElementById('start-date-text').innerText = CONFIG.startDateLabel;
+        document.getElementById('quote-text').innerText = `"${CONFIG.quoteText}"`;
+        document.getElementById('footer-text').innerText = CONFIG.footerText;
+ 
+        document.getElementById('glow-corner-1').style.backgroundColor = currentTheme.primary;
+        document.getElementById('glow-corner-2').style.backgroundColor = currentTheme.primary;
+ 
+        function enableFullScreen() {
+            const docEl = document.documentElement;
+            if (docEl.requestFullscreen) {
+                docEl.requestFullscreen().catch(() => {});
+            } else if (docEl.webkitRequestFullscreen) {
+                docEl.webkitRequestFullscreen();
+            } else if (docEl.msRequestFullscreen) {
+                docEl.msRequestFullscreen();
+            }
+            window.removeEventListener('touchstart', enableFullScreen);
+            window.removeEventListener('click', enableFullScreen);
+        }
+ 
+        window.addEventListener('touchstart', enableFullScreen, { once: true });
+        window.addEventListener('click', enableFullScreen, { once: true });
+ 
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+ 
+        function resizeCanvas_fn() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas_fn);
+        resizeCanvas_fn();
+ 
+        const cleanFirstName = CONFIG.firstName.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const cleanSecondName = CONFIG.secondName.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const characters = `0123456789${cleanFirstName}${cleanSecondName}TIMEINHEART<3`;
+        const fontSize = 16;
+        let columns = Math.floor(canvas.width / fontSize);
+        let drops = [];
+ 
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * -100);
+        }
+ 
+        function drawMatrix() {
+            ctx.fillStyle = currentTheme.matrixBg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+ 
+            ctx.font = fontSize + 'px monospace';
+ 
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters.charAt(Math.floor(Math.random() * characters.length));
+               
+                if (Math.random() > 0.85) {
+                    ctx.fillStyle = '#ffffff';
+                } else {
+                    ctx.fillStyle = currentTheme.primary;
+                }
+ 
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+ 
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 50);
+ 
+        const container = document.getElementById('floating-container');
+        const icons = ['fa-solid fa-heart', 'fa-solid fa-butterfly', 'fa-solid fa-feather', 'fa-solid fa-sparkles', 'fa-solid fa-ring'];
+ 
+        function createFloatingElement() {
+            const el = document.createElement('div');
+            el.className = 'floating-item';
+             
+            const iconClass = icons[Math.floor(Math.random() * icons.length)];
+            const size = Math.floor(Math.random() * 18 + 14);
+            el.innerHTML = `<i class="${iconClass}" style="color: ${currentTheme.secondary}; font-size: ${size}px; filter: drop-shadow(0 0 10px ${currentTheme.primary});"></i>`;
+             
+            el.style.left = Math.random() * 100 + 'vw';
+            const duration = Math.random() * 6 + 7;
+            el.style.animationDuration = duration + 's';
+             
+            container.appendChild(el);
+
+            setTimeout(() => {
+                el.remove();
+            }, duration * 1000);
+        }
+ 
+        setInterval(createFloatingElement, 400);
+ 
+        function updateTimer() {
+            const startDateObj = new Date(CONFIG.startDateISO);
+            const nowObj = new Date();
+ 
+            if (nowObj >= startDateObj) {
+                let years = nowObj.getFullYear() - startDateObj.getFullYear();
+                let months = nowObj.getMonth() - startDateObj.getMonth();
+                let days = nowObj.getDate() - startDateObj.getDate();
+                let hours = nowObj.getHours() - startDateObj.getHours();
+                let seconds = nowObj.getSeconds() - startDateObj.getSeconds();
+ 
+                if (seconds < 0) {
+                    seconds += 60;
+                    hours--;
+                }
+                if (hours < 0) {
+                    hours += 24;
+                    days--;
+                }
+                if (days < 0) {
+                    const prevMonth = new Date(nowObj.getFullYear(), nowObj.getMonth(), 0);
+                    days += prevMonth.getDate();
+                    months--;
+                }
+                if (months < 0) {
+                    months += 12;
+                    years--;
+                }
+ 
+                document.getElementById('years').innerText = String(years).padStart(2, '0');
+                document.getElementById('months').innerText = String(months).padStart(2, '0');
+                document.getElementById('days').innerText = String(days).padStart(2, '0');
+                document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+                document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
+            } else {
+                document.getElementById('years').innerText = '00';
+                document.getElementById('months').innerText = '00';
+                document.getElementById('days').innerText = '00';
+                document.getElementById('hours').innerText = '00';
+                document.getElementById('seconds').innerText = '00';
+            }
+        }
+ 
+        setInterval(updateTimer, 1000);
+        updateTimer();
+    </script>
+</body>
+</html>
